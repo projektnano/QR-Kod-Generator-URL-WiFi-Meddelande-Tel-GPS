@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-Kod Studio</title>
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.min.js" defer></script>
+    <style>
+        :root {
+            --bg-color: #0f172a; --card-bg: #1e293b; --text-color: #f1f5f9;
+            --accent-color: #38bdf8; --input-bg: #334155; --border: #475569; --success: #10b981;
+        }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; background: var(--card-bg); padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        h1 { text-align: center; color: var(--accent-color); margin-bottom: 2rem; font-weight: 800; letter-spacing: -1px; margin-top: 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-color); margin: 1.5rem 0 1rem 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; outline: none; font-size: 0.95rem; }
+        input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        .switch-wrapper { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        #preview-box { background: #f8fafc; padding: 25px; border-radius: 12px; display: flex; justify-content: center; align-items: center; min-height: 350px; border: 1px solid var(--border); }
+        button { width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; margin-top: 10px; font-size: 0.9rem; }
+        .btn-download { background: var(--success); color: white; }
+        .btn-download:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        #svg-raw { width: 100%; height: 90px; margin-top: 12px; background: #000; color: #10b981; font-family: monospace; font-size: 0.7rem; border-radius: 8px; padding: 10px; border: none; opacity: 0.8; resize: none; }
+        #notification { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: white; padding: 14px 28px; border-radius: 50px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        #notification.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="notification">✓ SVG-kod kopierad till urklipp</div>
+
+<div class="container">
+    <h1>QR Pro Studio</h1>
+    <div class="grid">
+        <div id="controls">
+            <div class="section-title">1. Innehåll</div>
+            <select id="qrType" style="margin-bottom: 12px;">
+                <option value="url">Hemsida (URL)</option>
+                <option value="wifi">WiFi-Nätverk</option>
+                <option value="tel">Telefonnummer</option>
+                <option value="msg">SMS Meddelande</option>
+                <option value="geo">GPS Koordinater</option>
+            </select>
+            <div id="inputs-container"></div>
+
+            <div class="section-title">2. Anpassa Design</div>
+            <label>Bakgrundsfärg</label>
+            <input type="color" id="bgColor" value="#ffffff" style="height: 50px; margin-bottom: 12px; cursor: pointer;">
+            
+            <div class="switch-wrapper">
+                <span style="font-weight: 500; font-size: 0.9rem;">Transparent bakgrund</span>
+                <label class="switch"><input type="checkbox" id="transSwitch"><span class="slider"></span></label>
+            </div>
+
+            <div class="section-title">3. Branding</div>
+            <label>Text i mitten (Max 5 tecken)</label>
+            <input type="text" id="centerText" placeholder="T.ex. HEJ, GO, QR" maxlength="5">
+        </div>
+
+        <div id="preview">
+            <div class="section-title">Förhandsvisning</div>
+            <div id="preview-box"><div id="qrcode-canvas"></div></div>
+            
+            <div style="margin-top:1.5rem">
+                <label>Filnamn</label>
+                <input type="text" id="filename" placeholder="Namnge din fil...">
+            </div>
+
+            <div style="display:flex; gap:8px">
+                <button class="btn-download" onclick="download('png')">Ladda ner PNG</button>
+                <button class="btn-download" onclick="download('svg')" style="background:#6366f1">Ladda ner SVG</button>
+            </div>
+            <button onclick="copySVG()" style="background:var(--accent-color); color:#0f172a">Kopiera SVG-kod</button>
+            <textarea id="svg-raw" readonly placeholder="SVG-kod genereras här..."></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    let qrCode = null; 
+    let updateTimeout;
+    document.addEventListener('DOMContentLoaded', () => {
+        initQR(); 
+        updateUI();
+        document.getElementById('qrType').addEventListener('change', updateUI);
+        document.getElementById('bgColor').addEventListener('input', debounce);
+        document.getElementById('transSwitch').addEventListener('change', debounce);
+        document.getElementById('centerText').addEventListener('input', debounce);
+    });
+
+    function initQR() {
+        qrCode = new QRCodeStyling({
+            width: 300, height: 300, type: "canvas",
+            data: "https://",
+            qrOptions: { errorCorrectionLevel: 'H' },
+            dotsOptions: { color: "#0f172a", type: "extra-rounded" },
+            backgroundOptions: { color: "#ffffff" },
+            imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 2 }
+        });
+        qrCode.append(document.getElementById("qrcode-canvas"));
+    }
+
+    function updateUI() {
+        const type = document.getElementById('qrType').value;
+        const container = document.getElementById('inputs-container');        
+        if(type === 'url') container.innerHTML = '<input id="v1" value="https://" placeholder="Ange URL">';
+        else if(type === 'wifi') container.innerHTML = '<input id="v1" placeholder="SSID (Namn)"><input id="v2" type="password" placeholder="Lösenord" style="margin-top:8px">';
+        else if(type === 'tel') container.innerHTML = '<input id="v1" placeholder="+46 70 000 00 00">';
+        else if(type === 'msg') container.innerHTML = '<textarea id="v1" placeholder="Skriv ditt SMS-meddelande här..."></textarea>';
+        else container.innerHTML = '<div style="display:flex; gap:8px"><input id="v1" placeholder="Lat"><input id="v2" placeholder="Long"></div>';
+        container.querySelectorAll('input, textarea').forEach(el => el.oninput = debounce);
+        debounce();
+    }
+
+    function debounce() { 
+        clearTimeout(updateTimeout); 
+        updateTimeout = setTimeout(generate, 250); 
+    }
+
+    function generate() {
+        if(!qrCode) return;
+        const type = document.getElementById('qrType').value;
+        const v1 = document.getElementById('v1')?.value || " ";
+        const v2 = document.getElementById('v2')?.value || "";
+        const cText = document.getElementById('centerText').value;
+        const isTrans = document.getElementById('transSwitch').checked;
+        const bgColor = document.getElementById('bgColor').value;
+        
+        let finalData = v1;
+        if(type === 'wifi') finalData = `WIFI:S:${v1};T:WPA;P:${v2};;`;
+        else if(type === 'tel') finalData = `tel:${v1}`;
+        else if(type === 'msg') finalData = `SMSTO::${v1}`;
+        else if(type === 'geo') finalData = `geo:${v1},${v2}`;
+        
+        let midContent = "";
+        if(cText) {
+            const canvas = document.createElement("canvas");
+            canvas.width = 250; canvas.height = 250;
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = isTrans ? "#ffffff" : bgColor;
+            ctx.beginPath();
+            ctx.roundRect(10, 10, 230, 230, 45); 
+            ctx.fill();
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 90px 'Inter', sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(cText.toUpperCase(), 125, 132);
+            midContent = canvas.toDataURL();
+        }
+
+        qrCode.update({
+            data: finalData || " ",
+            image: midContent,
+            backgroundOptions: { color: isTrans ? 'transparent' : bgColor }
+        });
+
+        const tempQR = new QRCodeStyling({...qrCode._options, type: "svg"});
+        tempQR.getRawData("svg").then(blob => {
+            const reader = new FileReader();
+            reader.onload = () => document.getElementById('svg-raw').value = reader.result;
+            reader.readAsText(blob);
+        });
+    }
+
+    function download(ext) { 
+        const name = document.getElementById('filename').value || 'qr-' + Date.now();
+        qrCode.download({ name: name, extension: ext }); 
+    }
+
+    function copySVG() { 
+        const code = document.getElementById('svg-raw').value;
+        if(!code) return;
+        navigator.clipboard.writeText(code).then(() => {
+            const n = document.getElementById('notification'); 
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
+        });
+    }
+</script>
+
+</body>
+</html>
