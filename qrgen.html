@@ -1,111 +1,369 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="sv-SE" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR-Kod Studio</title>
-    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.min.js" defer></script>
-    <style>        
-		:root {
-            --bg-color: #0f172a; --card-bg: #1e293b; --text-color: #f1f5f9;
-            --accent-color: #38bdf8; --input-bg: #334155; --border: #475569; --success: #10b981;
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.min.js" defer></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --accent-color: #38bdf8;
+            --input-bg: #334155;
+            --border: #475569;
+            --success: #10b981;
+            --indigo: #6366f1;
+            --dark-blue: #0f172a;
+            --warning: #fbbf24;
         }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; }
-		.container { width: 100%; max-width: 1000px; background: var(--card-bg); padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
-        h1 { text-align: center; color: var(--accent-color); margin-bottom: 2rem; font-weight: 800; letter-spacing: -1px; margin-top: 0; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-color); margin: 1.5rem 0 1rem 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; outline: none; font-size: 0.95rem; }
-        input:focus { border-color: var(--accent-color); }
-        .switch-wrapper { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px; }
-        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin: 0 0 2rem 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-color);
+            margin: 1.5rem 0 1rem 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .mt-10 { margin-top: 10px; }
+        .mt-15 { margin-top: 1.5rem; }
+        .mb-10 { margin-bottom: 10px; }
+        .gap-8 { display: flex; gap: 8px; }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .label-small { font-size: 0.85rem; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        input[type="color"] {
+            height: 45px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .color-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .color-col { flex: 1; }
+
+        .switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 22px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
         input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(22px); }
-        #preview-box { background: #f8fafc; padding: 25px; border-radius: 12px; display: flex; justify-content: center; align-items: center; min-height: 350px; border: 1px solid var(--border); }
-        button { width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; margin-top: 10px; font-size: 0.9rem; }
+
+        #preview-box {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+            border: 1px solid var(--border);
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-weight: bold; color: var(--warning); font-size: 0.9rem; }
+
+        .btn-container { display: flex; gap: 8px; margin-top: 10px; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
         .btn-download { background: var(--success); color: white; }
-        #svg-raw { width: 100%; height: 90px; margin-top: 12px; background: #000; color: #10b981; font-family: monospace; font-size: 0.7rem; border-radius: 8px; padding: 10px; border: none; opacity: 0.8; resize: none; }
-        #notification { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: white; padding: 14px 28px; border-radius: 50px; transition: 0.4s; z-index: 1000; }
+        .btn-svg-dl { background: var(--indigo); color: white; }
+        .btn-copy { background: var(--accent-color); color: var(--dark-blue); margin-top: 10px; }
+        
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        #svg-raw {
+            width: 100%;
+            height: 80px;
+            margin-top: 12px;
+            background: #000;
+            color: #10b981;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7rem;
+            border-radius: 8px;
+            padding: 10px;
+            border: none;
+            resize: none;
+        }
+
+        #notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--success);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
         #notification.show { transform: translateX(-50%) translateY(0); }
-        .color-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .color-row div { flex: 1; }
     </style>
 </head>
 <body>
 
-<div id="notification">✓ SVG-kod kopierad</div>
+<div id="notification">✓ SVG-koden kopierad</div>
 
 <div class="container">
     <h1>QR Pro Studio</h1>
     <div class="grid">
-        <div>
-            <div class="section-title">1. Innehåll</div>
-            <select id="qrType" style="margin-bottom: 12px;">
-                <option value="url">URL</option><option value="wifi">WiFi</option><option value="tel">Telefon</option><option value="msg">SMS</option><option value="geo">GPS</option>
-            </select>
+        <div id="settings">
+            <div class="section-title">1. Innehåll & Kvalitet</div>
+            <div class="form-group mb-10">
+                <select id="qrType">
+                    <option value="url">Hemsida (URL)</option>
+                    <option value="wifi">WiFi-Nätverk</option>
+                    <option value="tel">Telefonnummer</option>
+                    <option value="msg">SMS Meddelande</option>
+                    <option value="geo">GPS Koordinater</option>
+                </select>
+            </div>
             <div id="inputs-container"></div>
+            <div class="form-group mt-10">
+                <label>Felkorrigering (Error Correction)</label>
+                <select id="errorLevel">
+                    <option value="Q">Normal (Q)</option>
+                    <option value="H" selected>Hög (H) - Rekommenderas</option>
+                    <option value="M">Medium (M)</option>
+                    <option value="L">Låg (L)</option>
+                </select>
+            </div>
 
-            <div class="section-title">2. QR Gradient & Färg</div>
+            <div class="section-title">2. Mönster & Gradient</div>
+            <div class="form-group">
+                <label>Prick-mönster</label>
+                <select id="dotType">
+                    <option value="extra-rounded">Extra Runda</option>
+                    <option value="rounded">Rundade</option>
+                    <option value="square">Fyrkantiga</option>
+                    <option value="dots">Prickar</option>
+                    <option value="classy">Diamant (Classy)</option>
+                </select>
+            </div>
             <div class="color-row">
-                <div>
-                    <label style="font-size: 0.8rem;">Startfärg</label>
+                <div class="color-col">
+                    <label>Startfärg</label>
                     <input type="color" id="dotColor1" value="#38bdf8">
                 </div>
-                <div>
-                    <label style="font-size: 0.8rem;">Slutfärg</label>
+                <div class="color-col">
+                    <label>Slutfärg</label>
                     <input type="color" id="dotColor2" value="#10b981">
                 </div>
             </div>
-            <select id="gradientType">
-                <option value="linear">Linjär Gradient</option>
-                <option value="radial">Radiell Gradient</option>
-            </select>
 
-            <div class="section-title">3. Bakgrund & Branding</div>
-            <input type="color" id="bgColor" value="#ffffff" style="height: 40px; margin-bottom: 10px;">
-            <div class="switch-wrapper">
-                <span>Transparent bakgrund</span>
-                <label class="switch"><input type="checkbox" id="transSwitch"><span class="slider"></span></label>
+            <div class="section-title">3. Hörnens Stil (Corners)</div>
+            <div class="color-row">
+                <div class="color-col">
+                    <label>Ram-form</label>
+                    <select id="cornerSquareType">
+                        <option value="extra-rounded">Extra Rund</option>
+                        <option value="dot">Cirkel</option>
+                        <option value="square">Fyrkant</option>
+                    </select>
+                </div>
+                <div class="color-col">
+                    <label>Inre prick</label>
+                    <select id="cornerDotType">
+                        <option value="dot">Cirkel</option>
+                        <option value="square">Fyrkant</option>
+                    </select>
+                </div>
             </div>
-            <label style="display:block; margin-top:15px;">Text i mitten</label>
-            <input type="text" id="centerText" placeholder="T.ex. GO" maxlength="5">
+            <div class="form-group">
+                <label>Hörnens färg</label>
+                <input type="color" id="cornerColor" value="#0f172a">
+            </div>
+
+            <div class="section-title">4. Bakgrund & Branding</div>
+            <div class="switch-wrapper">
+                <span class="label-small">Transparent bakgrund</span>
+                <label class="switch">
+                    <input type="checkbox" id="transSwitch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="form-group mt-10">
+                <label>Bakgrundsfärg</label>
+                <input type="color" id="bgColor" value="#ffffff">
+            </div>
+            <div class="form-group">
+                <label>Text i mitten</label>
+                <input type="text" id="centerText" placeholder="Max 5 tecken" maxlength="5">
+            </div>
         </div>
 
-        <div>
+        <div id="preview">
             <div class="section-title">Förhandsvisning</div>
-            <div id="preview-box"><div id="qrcode-canvas"></div></div>
-            <input type="text" id="filename" placeholder="Filnamn" style="margin-top:1rem">
-            <div style="display:flex; gap:8px">
-                <button class="btn-download" onclick="download('png')">PNG</button>
-                <button class="btn-download" onclick="download('svg')" style="background:#6366f1">SVG</button>
+            <div id="preview-box">
+                <div id="qrcode-canvas"></div>
             </div>
-            <button onclick="copySVG()" style="background:var(--accent-color); color:#0f172a">Kopiera SVG-kod</button>
-            <textarea id="svg-raw" readonly></textarea>
+            
+            <div class="stats-container">
+                <div class="stat-item">
+                    Est. PNG storlek
+                    <span id="pngSize" class="stat-value">0 KB</span>
+                </div>
+                <div class="stat-item">
+                    Est. SVG storlek
+                    <span id="svgSize" class="stat-value">0 KB</span>
+                </div>
+            </div>
+            
+            <div class="mt-15">
+                <label>Filnamn</label>
+                <input type="text" id="filename" placeholder="Namnge din QR-kod...">
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-download" onclick="download('png')">PNG</button>
+                <button class="btn-svg-dl" onclick="download('svg')">SVG</button>
+            </div>
+            <button class="btn-copy" onclick="copySVG()">Kopiera SVG-kod</button>
+            <textarea id="svg-raw" readonly placeholder="SVG XML-kod..."></textarea>
         </div>
     </div>
 </div>
 
 <script>
-    let qrCode = null;
-	let updateTimeout;
+    let qrCode = null; 
+    let updateTimeout;
+
     document.addEventListener('DOMContentLoaded', () => {
         initQR(); 
         updateUI();
-        document.getElementById('qrType').onchange = updateUI;
-        document.querySelectorAll('input, select').forEach(el => el.oninput = debounce);
+        document.getElementById('qrType').addEventListener('change', updateUI);
+        document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', debounce));
     });
 
     function initQR() {
         qrCode = new QRCodeStyling({
-            width: 300, height: 300, type: "canvas",
+            width: 320, 
+            height: 320, 
+            type: "canvas",
             data: "https://",
             qrOptions: { errorCorrectionLevel: 'H' },
-            dotsOptions: { type: "extra-rounded" },
-            backgroundOptions: { color: "#ffffff" },
             imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 2 }
         });
         qrCode.append(document.getElementById("qrcode-canvas"));
@@ -115,63 +373,96 @@
         const type = document.getElementById('qrType').value;
         const container = document.getElementById('inputs-container');
         if(type === 'url') container.innerHTML = '<input id="v1" value="https://">';
-        else if(type === 'wifi') container.innerHTML = '<input id="v1" placeholder="SSID"><input id="v2" type="password" placeholder="Lösen" style="margin-top:8px">';
+        else if(type === 'wifi') container.innerHTML = '<input id="v1" placeholder="SSID"><input id="v2" type="password" placeholder="Lösenord" class="mt-10">';
         else if(type === 'tel') container.innerHTML = '<input id="v1" placeholder="+46">';
-        else if(type === 'msg') container.innerHTML = '<textarea id="v1" placeholder="SMS..."></textarea>';
-        else container.innerHTML = '<div style="display:flex; gap:8px"><input id="v1" placeholder="Lat"><input id="v2" placeholder="Long"></div>';
+        else if(type === 'msg') container.innerHTML = '<textarea id="v1" placeholder="Meddelande..."></textarea>';
+        else container.innerHTML = '<div class="gap-8"><input id="v1" placeholder="Lat"><input id="v2" placeholder="Long"></div>';
+        
         container.querySelectorAll('input, textarea').forEach(el => el.oninput = debounce);
         debounce();
     }
 
-    function debounce() { clearTimeout(updateTimeout); updateTimeout = setTimeout(generate, 250); }
+    function debounce() { 
+        clearTimeout(updateTimeout); 
+        updateTimeout = setTimeout(generate, 250); 
+    }
 
     function generate() {
         if(!qrCode) return;
-        const cText = document.getElementById('centerText').value;
         const isTrans = document.getElementById('transSwitch').checked;
         const bgColor = document.getElementById('bgColor').value;
-        const color1 = document.getElementById('dotColor1').value;
-        const color2 = document.getElementById('dotColor2').value;
-        const gType = document.getElementById('gradientType').value;
-        
+        const cText = document.getElementById('centerText').value;
+
         let midContent = "";
         if(cText) {
             const canvas = document.createElement("canvas");
             canvas.width = 250; canvas.height = 250;
             const ctx = canvas.getContext("2d");
             ctx.fillStyle = isTrans ? "#ffffff" : bgColor;
-            ctx.beginPath(); ctx.roundRect(10, 10, 230, 230, 45); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(10, 10, 230, 230, 50); ctx.fill();
             ctx.fillStyle = "#0f172a"; ctx.font = "bold 90px 'Inter', sans-serif";
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText(cText.toUpperCase(), 125, 132);
+            ctx.fillText(cText.toUpperCase(), 125, 130);
             midContent = canvas.toDataURL();
         }
 
         qrCode.update({
             data: document.getElementById('v1')?.value || " ",
             image: midContent,
+            qrOptions: { errorCorrectionLevel: document.getElementById('errorLevel').value },
             backgroundOptions: { color: isTrans ? 'transparent' : bgColor },
             dotsOptions: {
+                type: document.getElementById('dotType').value,
                 gradient: {
-                    type: gType,
-                    colorStops: [{ offset: 0, color: color1 }, { offset: 1, color: color2 }]
+                    type: "linear",
+                    colorStops: [
+                        { offset: 0, color: document.getElementById('dotColor1').value },
+                        { offset: 1, color: document.getElementById('dotColor2').value }
+                    ]
                 }
+            },
+            cornersSquareOptions: {
+                type: document.getElementById('cornerSquareType').value,
+                color: document.getElementById('cornerColor').value
+            },
+            cornersDotOptions: {
+                type: document.getElementById('cornerDotType').value,
+                color: document.getElementById('cornerColor').value
             }
         });
 
         const tempQR = new QRCodeStyling({...qrCode._options, type: "svg"});
         tempQR.getRawData("svg").then(blob => {
             const reader = new FileReader();
-            reader.onload = () => document.getElementById('svg-raw').value = reader.result;
+            reader.onload = () => {
+                const svgContent = reader.result;
+                document.getElementById('svg-raw').value = svgContent;
+                document.getElementById('svgSize').innerText = (blob.size / 1024).toFixed(1) + " KB";
+            };
             reader.readAsText(blob);
         });
+
+        const canvas = document.querySelector("#qrcode-canvas canvas");
+        if(canvas) {
+            canvas.toBlob((blob) => {
+                document.getElementById('pngSize').innerText = (blob.size / 1024).toFixed(1) + " KB";
+            }, 'image/png');
+        }
     }
 
-    function download(ext) { qrCode.download({ name: document.getElementById('filename').value || 'qr', extension: ext }); }
+    function download(ext) { 
+        const name = document.getElementById('filename').value || 'qr-' + Date.now();
+        qrCode.download({ name: name, extension: ext }); 
+    }
+    
     function copySVG() { 
-        navigator.clipboard.writeText(document.getElementById('svg-raw').value);
-        const n = document.getElementById('notification'); n.classList.add('show');
-        setTimeout(() => n.classList.remove('show'), 3000);
+        const code = document.getElementById('svg-raw').value;
+        if(!code) return;
+        navigator.clipboard.writeText(code).then(() => {
+            const n = document.getElementById('notification'); 
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
+        });
     }
 </script>
 </body>
